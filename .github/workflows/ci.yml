@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Vérifier que index.html existe
+        run: |
+          if [ ! -f index.html ]; then
+            echo "❌ index.html est introuvable !"
+            exit 1
+          fi
+          echo "✅ index.html trouvé"
+
+      - name: Valider le HTML
+        uses: Cyb3r-Jak3/html5validator-action@v7.2.0
+        with:
+          root: .
+
+      - name: Vérifier les liens cassés
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --no-progress './**/*.html'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
